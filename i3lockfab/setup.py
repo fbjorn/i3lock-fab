@@ -14,7 +14,7 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = 'i3lockfab'
 DESCRIPTION = 'Multimonitor wrapper for i3lock. '
-URL = 'https://github.com/fbjorn/i3smartlock'
+URL = 'https://github.com/fbjorn/i3lock-fab'
 EMAIL = 'kopfabschneider@yandex.ru'
 AUTHOR = 'fbjorn'
 
