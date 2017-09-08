@@ -9,7 +9,7 @@ import requests
 import yaml
 
 
-APP_DIR = os.path.join(os.path.expanduser('~'), '.{}'.format('i3smartlock'))
+APP_DIR = os.path.join(os.path.expanduser('~'), '.{}'.format('i3lock-fab'))
 ORIGINAL_IMG = os.path.join(APP_DIR, 'background.png')
 OUTPUT_IMG = os.path.join(APP_DIR, 'out.png')
 CONF_PATH = os.path.join(APP_DIR, 'conf.yaml')
@@ -71,7 +71,7 @@ def make_huge_image():
         width, height, x, y = [int(x) for x in size]
         geometry = '{}X{}^'.format(width, height)
         crop = '{}X{}+0+0'.format(width, height)
-        out_img = '/tmp/i3smartlock-{}.png'.format(i)
+        out_img = '/tmp/i3lock-fab-{}.png'.format(i)
         run_in_shell(
             'convert', ORIGINAL_IMG, '-resize', geometry, '-gravity', 'Center',
             '-crop', crop, '+repage', out_img

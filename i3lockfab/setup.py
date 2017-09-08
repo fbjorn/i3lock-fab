@@ -12,7 +12,7 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'i3smartlock'
+NAME = 'i3lockfab'
 DESCRIPTION = 'Multimonitor wrapper for i3lock. '
 URL = 'https://github.com/fbjorn/i3smartlock'
 EMAIL = 'kopfabschneider@yandex.ru'
@@ -83,10 +83,10 @@ setup(
     url=URL,
     # packages=find_packages(exclude=('tests',)),
     # If your package is a single module, use this instead of 'packages':
-    py_modules=['i3smartlock'],
+    py_modules=['i3lockfab'],
 
     entry_points={
-        'console_scripts': ['i3smartlock=i3smartlock:main'],
+        'console_scripts': ['i3lock-fab=i3lockfab:main'],
     },
     install_requires=REQUIRED,
     include_package_data=True,
