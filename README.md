@@ -31,4 +31,4 @@ You can disable image randomizer or change the pictures origin
 
 
 
-Thanks [@ShikherVerma](https://github.com/ShikherVermaShikherVerma) for idea with image resizing.
+Thanks [@ShikherVerma](https://github.com/ShikherVerma) for idea with image resizing.
