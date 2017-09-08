@@ -5,7 +5,7 @@ Key differences:
  - ##### Enable multimonitor support  
    Background image fits correctly in all your monitors ecsaping ugly tiling  
    
-Requirements:
+### Requirements:
 - i3lock
 - ImageMagic  
 
@@ -14,18 +14,18 @@ Requirements:
 sudo apt-get install imagemagick i3lock
 ```
 
-Installation:  
+### Installation:  
 ```bash
 pip install i3lockfab
 ```
 
-Usage:  
+### Usage:  
 Replace `i3lock` with `i3lock-fab` in your i3 config. e.g.:  
 ```bash
 bindsym $mod+l exec "i3lock-fab"
 ```
 
-Configuration:
+### Configuration:
 All the settings are located in `~/.i3lock-fab/conf.yaml`  
 You can disable image randomizer or change the pictures origin
 
