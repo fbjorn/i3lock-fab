@@ -2,18 +2,19 @@ import re
 import os
 import random
 import subprocess
+import time
+from tempfile import NamedTemporaryFile
 from uuid import uuid4
 from threading import Thread
 
 import requests
 import yaml
 
-
-APP_DIR = os.path.join(os.path.expanduser('~'), '.{}'.format('i3lock-fab'))
+LINUX_CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.config')
+APP_DIR = os.path.join(LINUX_CONFIG_DIR, '.{}'.format('i3lock-fab'))
 ORIGINAL_IMG = os.path.join(APP_DIR, 'background.png')
 OUTPUT_IMG = os.path.join(APP_DIR, 'out.png')
 CONF_PATH = os.path.join(APP_DIR, 'conf.yaml')
-
 
 DISPLAY_RE = r'(\d+)x(\d+)\+(\d+)\+(\d+)'
 IMAGE_URL_RE = r'https?://[^ ]+?jpg'
@@ -21,7 +22,11 @@ DEFAULT_CONF = {
     'random_pic': True,
     'url': 'https://www.reddit.com/r/wallpaper/',
     'show_failed_attempts': True,
-    'no_unlock_indicator': False
+    'no_unlock_indicator': False,
+    'proxies': {
+        'http': '',
+        'https': ''
+    },
 }
 
 
@@ -37,8 +42,9 @@ def run_in_shell(*cmd):
 
 
 def prepare_stuff():
-    if not os.path.exists(APP_DIR):
-        os.makedirs(APP_DIR)
+    for path in (LINUX_CONFIG_DIR, APP_DIR):
+        if not os.path.exists(path):
+            os.makedirs(path)
     if not os.path.exists(OUTPUT_IMG):
         make_black_image((1366, 768), OUTPUT_IMG)
     if not os.path.exists(CONF_PATH):
@@ -51,8 +57,10 @@ def load_user_conf():
     try:
         with open(CONF_PATH) as conf_file:
             conf.update(yaml.load(conf_file.read()))
-    except:
-        pass
+    except Exception as exc:
+        exception_handler(exc)
+    if not conf['proxies']['http'] and not conf['proxies']['https']:
+        del conf['proxies']
     return conf
 
 
@@ -88,9 +96,10 @@ def make_huge_image():
     run_in_shell(*cmd)
 
 
-def get_random_image_url(url):
+def get_random_image_url(url, proxies=None):
     headers = {'User-Agent': str(uuid4())}
-    html = requests.get(url, headers=headers).content.decode('utf8')
+    response = requests.get(url, headers=headers, proxies=proxies)
+    html = response.content.decode('utf8')
     urls = set([
         url for url in re.findall(IMAGE_URL_RE, html)
         if len(url) < 35 and 'out' not in url
@@ -98,9 +107,9 @@ def get_random_image_url(url):
     return random.choice(list(urls))
 
 
-def download_image(url, output):
+def download_image(url, output, proxies=None):
     headers = {'User-Agent': str(uuid4())}
-    image = requests.get(url, headers=headers).content
+    image = requests.get(url, headers=headers, proxies=proxies).content
     with open(output, 'wb') as out:
         out.write(image)
 
@@ -117,18 +126,32 @@ def lock_computer(conf, bkg_image):
 
 def bkg_worker(conf):
     try:
-        url = get_random_image_url(conf['url'])
-        download_image(url, ORIGINAL_IMG)
-    except:
-        return
-    make_huge_image()
+        proxies = conf.get('proxies')
+        url = get_random_image_url(conf['url'], proxies)
+        download_image(url, ORIGINAL_IMG, proxies)
+        make_huge_image()
+    except Exception as exc:
+        exception_handler(exc)
+
+
+def exception_handler(exc):
+    prefix = 'i3lock-fab-{}'.format(int(time.time()))
+    with NamedTemporaryFile(prefix=prefix, delete=False, mode='w') as log:
+        log.write(str(exc))
 
 
 def main():
-    prepare_stuff()
-    conf = load_user_conf()
-    if conf['random_pic']:
-        Thread(target=bkg_worker, args=(conf,)).start()
-        lock_computer(conf, OUTPUT_IMG)
-    else:
-        lock_computer(conf, ORIGINAL_IMG)
+    try:
+        prepare_stuff()
+        conf = load_user_conf()
+        image_path = ORIGINAL_IMG
+        if conf['random_pic']:
+            Thread(target=bkg_worker, args=(conf,)).start()
+            image_path = OUTPUT_IMG
+        lock_computer(conf, image_path)
+    except Exception as exc:
+        exception_handler(exc)
+
+
+if __name__ == '__main__':
+    main()
